@@ -79,9 +79,32 @@ public class Connection implements Runnable {
                 }
             }
 
-            this.user = this.usersRepo.createUser(inputId, Integer.valueOf(inputPort));
+            this.user = this.usersRepo.createUser(inputId, Integer.valueOf(inputPort), this);
+            
+            this.usersRepo.sendMessageToAllMembers(this.user.clientID + " has just connected to this chat group!");
 
-            this.outputWriter.println("Hello " + this.user.clientID);
+            String input;
+            while((input = this.inputReader.readLine()) != null ) {
+                if (input.substring(0, Math.min(input.length(), 3)).equals("@pv")) {
+                    String[] arrayInput = input.trim().split("\\s+");
+                    String message = input.replace("@pv " + arrayInput[1], "");
+                    this.usersRepo.sendMessageTo(arrayInput[1], message, this.user.clientID);
+                    continue;
+                }
+                if (input.equals("@bye")) {
+                    this.usersRepo.quitUser(this.user.clientID);
+                    this.usersRepo.sendMessageToAllMembers(this.user.clientID + " has left!");
+                    continue;
+                }
+                if (input.substring(0, Math.min(input.length(), 5)).equals("@info")) {
+                    String[] arrayInput = input.trim().split("\\s+");
+                    this.outputWriter.println(this.usersRepo.findUserByID(arrayInput[1]).requestData());
+                    continue;
+                }
+                this.usersRepo.sendMessageToAllMembers(this.clientID + ": " + input);
+            }
+
+
 
         } catch (IOException e) {
             e.printStackTrace();

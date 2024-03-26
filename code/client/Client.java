@@ -80,9 +80,10 @@ public class Client implements Runnable {
     
     public static void main(String[] args) {
         try {
-            // Manufacturing and injecting dependencies
             Socket socket = new Socket("127.0.0.1", 5555);
+
             PrintWriter outputWriter = new PrintWriter(socket.getOutputStream(), true);
+
             BufferedReader inputReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             
             Client client = new Client(socket, outputWriter, inputReader);

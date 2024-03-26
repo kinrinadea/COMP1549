@@ -2,7 +2,10 @@ package server.UserRepository;
 
 import java.util.ArrayList;
 
+import server.Connection;
+
 public class Repository {
+    private User coordinator;
     private ArrayList<User> users;
 
     public Repository() {
@@ -15,15 +18,25 @@ public class Repository {
      * @param userID
      * @param port
      */
-    public User createUser(String userID, Integer port) {
+    public User createUser(String userID, Integer port, Connection clientConnection) {
         boolean isCoordinator = false;
         if (this.users.isEmpty()) {
             isCoordinator = true;
         }
-        User newUser = new User(userID, port, isCoordinator);
+        User newUser = new User(userID, port, isCoordinator, clientConnection);
         this.users.add(newUser);
 
+        if (newUser.isCoordinator) {
+            this.coordinator = newUser;
+        }
+
+        this.welcome(newUser);
+
         return newUser;
+    }
+
+    public void quitUser(String userID) {
+        this.users.remove(findUserByID(userID));
     }
 
     /**
@@ -55,4 +68,36 @@ public class Repository {
         }
         return null;
     }
+
+    /**
+     * Send to message all users
+     * 
+     * @param message
+     */
+    public void sendMessageToAllMembers(String message) {
+        for (User u : this.users) {
+            u.message(message);
+        }
+    }
+
+    /**
+     * Send to specific user
+     * 
+     */
+    public void sendMessageTo(String recipientClientID, String message, String senderClientID) {
+        this.findUserByID(recipientClientID).message(senderClientID + " sent to you: " + message);
+    }
+
+    /**
+     * Welcome message and coordinator info
+     */
+    public void welcome(User user) {
+        user.message("Hello " + user.clientID + ", welcome this this group!");
+        if (user.isCoordinator) {
+            user.message("You are the responsible coordinator of this group.");
+        } else {
+            user.message(this.coordinator.clientID + " is the coordinator");
+        }
+    }
+
 }
