@@ -3,7 +3,7 @@ package server.UserRepository;
 import server.Connection;
 
 public class User {
-    
+
     public String clientID;
     public Integer port;
     public boolean isCoordinator;

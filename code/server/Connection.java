@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
 
 import server.UserRepository.Repository;
 import server.UserRepository.User;
@@ -85,23 +84,30 @@ public class Connection implements Runnable {
 
             String input;
             while((input = this.inputReader.readLine()) != null ) {
-                if (input.substring(0, Math.min(input.length(), 3)).equals("@pv")) {
-                    String[] arrayInput = input.trim().split("\\s+");
-                    String message = input.replace("@pv " + arrayInput[1], "");
-                    this.usersRepo.sendMessageTo(arrayInput[1], message, this.user.clientID);
-                    continue;
+                try {
+                    if (input.substring(0, Math.min(input.length(), 3)).equals("@pv")) {
+                        String[] arrayInput = input.trim().split("\\s+");
+                        String message = input.replace("@pv " + arrayInput[1], "");
+                        this.usersRepo.sendMessageTo(arrayInput[1], message, this.user.clientID);
+                        this.outputWriter.println("Sent");
+                        continue;
+                    }
+                    if (input.equals("@bye")) {
+                        this.outputWriter.print("Goodbye!");
+                        this.usersRepo.quitUser(this.user.clientID);
+                        this.usersRepo.sendMessageToAllMembers(this.user.clientID + " has left!");
+                        continue;
+                    }
+                    if (input.substring(0, Math.min(input.length(), 5)).equals("@info")) {
+                        String[] arrayInput = input.trim().split("\\s+");
+                        this.outputWriter.println(this.usersRepo.findUserByID(arrayInput[1]).requestData());
+                        continue;
+                    }
+
+                    this.usersRepo.sendMessageToAllMembers(this.user.clientID + ": " + input);
+                } catch (Exception e) {
+                    this.outputWriter.println("Error sending message, please try again. Details: " + e.getMessage());
                 }
-                if (input.equals("@bye")) {
-                    this.usersRepo.quitUser(this.user.clientID);
-                    this.usersRepo.sendMessageToAllMembers(this.user.clientID + " has left!");
-                    continue;
-                }
-                if (input.substring(0, Math.min(input.length(), 5)).equals("@info")) {
-                    String[] arrayInput = input.trim().split("\\s+");
-                    this.outputWriter.println(this.usersRepo.findUserByID(arrayInput[1]).requestData());
-                    continue;
-                }
-                this.usersRepo.sendMessageToAllMembers(this.clientID + ": " + input);
             }
 
 
@@ -113,6 +119,10 @@ public class Connection implements Runnable {
     }
 
     public Boolean validatePortInput(String inputPort) {
+        if (inputPort.isBlank()) {
+            return false;
+        }
+
         // Checks if its numeric
         if (inputPort != null) {
             for (char c : inputPort.toCharArray()) {
@@ -129,6 +139,11 @@ public class Connection implements Runnable {
         }
         
         return true;
+    }
+
+    private String getHelpCommands() {
+        String guide = "Please check the commands guidelines: \n@pv {friendID} {message} - for private messages \n@info {friendID} - to request friend info\n @bye - to leave";
+        return guide;
     }
 
 }

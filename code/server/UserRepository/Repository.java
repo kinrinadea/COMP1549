@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import server.Connection;
 
+//TODO: in periodical checks: update coordinator.info
 public class Repository {
     private User coordinator;
     private ArrayList<User> users;
