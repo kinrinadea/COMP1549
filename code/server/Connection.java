@@ -21,6 +21,7 @@ public class Connection implements Runnable {
     public PrintWriter outputWriter;
     
     public String clientID;
+    public String currentUserId;
     public Integer port;
 
 
@@ -83,7 +84,6 @@ public class Connection implements Runnable {
             }
 
             this.user = this.usersRepo.createUser(inputId, Integer.valueOf(inputPort), this);
-            
             this.usersRepo.sendMessageToAllMembers(this.user.clientID + " has just connected to this chat group!");
 
             String input;
@@ -114,9 +114,8 @@ public class Connection implements Runnable {
                     this.outputWriter.println(this.getHelpCommands());
                 }
             }
-
-
-
+            this.usersRepo.sendMessageToAllMembers(this.user.clientID + " left :)");
+            this.usersRepo.quitUser(this.user.clientID);
         } catch (IOException e) {
             e.printStackTrace();
             this.turnoff();
@@ -149,6 +148,29 @@ public class Connection implements Runnable {
     private String getHelpCommands() {
         String guide = "Please check the commands guidelines: \n@pv {friendID} {message} - for private messages \n@info {friendID} - to request friend info\n @bye - to leave";
         return guide;
+    }
+
+    public static Boolean testValidatePortInput(String inputPort) {
+        if (inputPort.isBlank()) {
+            return false;
+        }
+
+        // Checks if its numeric
+        if (inputPort != null) {
+            for (char c : inputPort.toCharArray()) {
+                if (!Character.isDigit(c)) {
+                    return false;
+                }
+            }
+        }
+
+        // Transform to int and check if port is free
+        Integer intPort = Integer.valueOf(inputPort);
+        // if (this.usersRepo.findUserByPort(intPort) != null) {
+        //     return false;
+        // }
+        
+        return true;
     }
 
 }

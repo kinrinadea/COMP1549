@@ -37,7 +37,15 @@ public class Repository {
     }
 
     public void quitUser(String userID) {
-        this.users.remove(findUserByID(userID));
+        User u = findUserByID(userID);
+        this.users.remove(u);
+
+        if (u.isCoordinator && !this.users.isEmpty()) {
+            User newCoord = this.users.getFirst();
+            newCoord.isCoordinator = true;
+            this.coordinator = newCoord;
+            this.coordinator.message("You became coordinator!");
+        }
     }
 
     /**
