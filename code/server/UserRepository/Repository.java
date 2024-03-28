@@ -2,12 +2,12 @@ package server.UserRepository;
 
 import java.util.ArrayList;
 
+import cron.Cron;
 import server.Connection;
 
-//TODO: in periodical checks: update coordinator.info
 public class Repository {
-    private User coordinator;
-    private ArrayList<User> users;
+    public User coordinator;
+    public ArrayList<User> users;
 
     public Repository() {
         this.users = new ArrayList<>();

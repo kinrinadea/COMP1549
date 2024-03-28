@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 
+import cron.Cron;
 import server.UserRepository.Repository;
 import server.UserRepository.User;
 
@@ -14,6 +15,7 @@ public class Connection implements Runnable {
     private Socket client;
     private Repository usersRepo;
     private User user;
+    private Cron cron;
 
     public BufferedReader inputReader;
     public PrintWriter outputWriter;
@@ -33,6 +35,8 @@ public class Connection implements Runnable {
 
             this.clientID = "";
             this.port = null;
+
+            this.cron = new Cron(usersRepo);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -107,6 +111,7 @@ public class Connection implements Runnable {
                     this.usersRepo.sendMessageToAllMembers(this.user.clientID + ": " + input);
                 } catch (Exception e) {
                     this.outputWriter.println("Error sending message, please try again. Details: " + e.getMessage());
+                    this.outputWriter.println(this.getHelpCommands());
                 }
             }
 
